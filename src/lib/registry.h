@@ -47,7 +47,8 @@ public:
         return wrapper->Value();
     }
 
-    std:: Type(const std::string &name) const {
+    template<typename T>
+    std::optional<T> Type(const std::string &name) const {
         std::lock_guard lock(m_Mutex);
         const auto it = m_Variables.find(name);
         if (it == m_Variables.end())
