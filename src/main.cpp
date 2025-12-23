@@ -11,9 +11,9 @@ int main() {
 
     Config().LoadFromFile("config.json");
 
-    for (const auto& var : Config().ListAll()) {
+    for (const auto &var: Config().ListAll()) {
         auto info = *Config().GetInfo(var);
-        std::cout << std::format("{}: {} = {}(def: {})", info.name, info.type, info.value, info.default_value) << std::endl;
+        std::println(std::cout, "{}: {} = {}(def: {})", info.name, info.type, info.value, info.default_value);
     }
 
     Config().SaveToFile("config.json");

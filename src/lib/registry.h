@@ -23,10 +23,10 @@ class CConfigRegistry {
 
     // json helpers
 
-    json& GetNestedJson(json& root, const std::string& path) {
+    json &GetNestedJson(json &root, const std::string &path) {
         size_t start = 0;
         size_t end = path.find('.');
-        json* current = &root;
+        json *current = &root;
 
         while (end != std::string::npos) {
             std::string part = path.substr(start, end - start);
@@ -41,22 +41,22 @@ class CConfigRegistry {
         return *current;
     }
 
-    void SetNestedValue(json& root, const std::string& path, const json& value) {
+    void SetNestedValue(json &root, const std::string &path, const json &value) {
         size_t lastDot = path.rfind('.');
         if (lastDot == std::string::npos) {
             root[path] = value;
         } else {
             std::string parentPath = path.substr(0, lastDot);
             std::string key = path.substr(lastDot + 1);
-            json& parent = GetNestedJson(root, parentPath);
+            json &parent = GetNestedJson(root, parentPath);
             parent[key] = value;
         }
     }
 
-    std::optional<json> GetNestedValue(const json& root, const std::string& path) const {
+    std::optional<json> GetNestedValue(const json &root, const std::string &path) const {
         size_t start = 0;
         size_t end = path.find('.');
-        const json* current = &root;
+        const json *current = &root;
 
         while (end != std::string::npos) {
             std::string part = path.substr(start, end - start);
@@ -80,7 +80,7 @@ public:
         return instance;
     }
 
-    void SetConfigPath(const std::string& path) {
+    void SetConfigPath(const std::string &path) {
         std::lock_guard lock(m_Mutex);
         m_ConfigPath = path;
     }
@@ -204,13 +204,13 @@ public:
 
     // serialization
 
-    std::expected<void, std::string> SaveToFile(const std::string& filepath) {
+    std::expected<void, std::string> SaveToFile(const std::string &filepath) {
         std::lock_guard lock(m_Mutex);
 
         try {
             json root = json::object();
 
-            for (const auto& [name, var] : m_Variables) {
+            for (const auto &[name, var]: m_Variables) {
                 SetNestedValue(root, name, var->ValueAsJson());
             }
 
@@ -222,7 +222,7 @@ public:
             file.close();
 
             return {};
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             return std::unexpected("Error saving config: " + std::string(e.what()));
         }
     }
@@ -233,7 +233,7 @@ public:
         return SaveToFile(m_ConfigPath);
     }
 
-    std::expected<void, std::string> LoadFromFile(const std::string& filepath) {
+    std::expected<void, std::string> LoadFromFile(const std::string &filepath) {
         std::lock_guard lock(m_Mutex);
 
         try {
@@ -247,7 +247,7 @@ public:
 
             std::vector<std::string> errors;
 
-            for (const auto& [name, var] : m_Variables) {
+            for (const auto &[name, var]: m_Variables) {
                 auto value = GetNestedValue(root, name);
                 if (!value.has_value())
                     continue;
@@ -260,15 +260,15 @@ public:
 
             if (!errors.empty()) {
                 std::string errorMsg = "Some variables failed to load:\n";
-                for (const auto& err : errors)
+                for (const auto &err: errors)
                     errorMsg += " - " + err + "\n";
                 return std::unexpected(errorMsg);
             }
 
             return {};
-        } catch (const json::exception& e) {
+        } catch (const json::exception &e) {
             return std::unexpected("JSON parse error: " + std::string(e.what()));
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             return std::unexpected("Error loading config: " + std::string(e.what()));
         }
     }
@@ -280,13 +280,13 @@ public:
     }
 
     // config with metadata (descriptions, types, defaults)
-    std::expected<void, std::string> ExportTemplate(const std::string& filepath) {
+    std::expected<void, std::string> ExportTemplate(const std::string &filepath) {
         std::lock_guard lock(m_Mutex);
 
         try {
             json root = json::object();
 
-            for (const auto& [name, var] : m_Variables) {
+            for (const auto &[name, var]: m_Variables) {
                 json varInfo = json::object();
                 varInfo["value"] = var->ValueAsJson();
                 varInfo["default"] = var->DefaultValueAsJson();
@@ -305,7 +305,7 @@ public:
             file.close();
 
             return {};
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             return std::unexpected("Error exporting template: " + std::string(e.what()));
         }
     }

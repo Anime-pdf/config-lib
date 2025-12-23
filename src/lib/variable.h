@@ -18,19 +18,25 @@ public:
     virtual ~IConfigVariableBase() = default;
 
     virtual std::type_index Type() const = 0;
+
     virtual std::string_view TypeString() const = 0;
 
     virtual std::string ValueAsString() const = 0;
+
     virtual std::string DefaultValueAsString() const = 0;
 
     virtual json ValueAsJson() const = 0;
+
     virtual json DefaultValueAsJson() const = 0;
 
     virtual std::string_view Name() const = 0;
+
     virtual std::optional<std::string_view> Description() const = 0;
 
     virtual std::expected<void, std::string> TrySet(const std::string &value) = 0;
+
     virtual std::expected<void, std::string> TrySetJson(const json &value) = 0;
+
     virtual void Reset() = 0;
 };
 
@@ -58,6 +64,7 @@ public:
     }
 
     std::type_index Type() const override { return typeid(T); }
+
     std::string_view TypeString() const override {
         if (m_TypeNames.contains(Type()))
             return m_TypeNames.at(Type());
@@ -107,12 +114,12 @@ public:
         return std::unexpected(result.error());
     }
 
-    std::expected<void, std::string> TrySetJson(const json& Value) override {
+    std::expected<void, std::string> TrySetJson(const json &Value) override {
         try {
             T typedValue = Value.get<T>();
             m_Value = typedValue;
             return {};
-        } catch (const json::exception& e) {
+        } catch (const json::exception &e) {
             return std::unexpected("JSON parse error: " + std::string(e.what()));
         }
     }
