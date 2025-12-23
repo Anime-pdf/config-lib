@@ -8,19 +8,29 @@
 #include <typeindex>
 #include <utility>
 
+#include <external/json.hpp>
+
+using namespace nlohmann;
+
 // abstract class for typeless storage
 class IConfigVariableBase {
 public:
     virtual ~IConfigVariableBase() = default;
 
     virtual std::type_index Type() const = 0;
+    virtual std::string_view TypeString() const = 0;
+
     virtual std::string ValueAsString() const = 0;
     virtual std::string DefaultValueAsString() const = 0;
+
+    virtual json ValueAsJson() const = 0;
+    virtual json DefaultValueAsJson() const = 0;
 
     virtual std::string_view Name() const = 0;
     virtual std::optional<std::string_view> Description() const = 0;
 
     virtual std::expected<void, std::string> TrySet(const std::string &value) = 0;
+    virtual std::expected<void, std::string> TrySetJson(const json &value) = 0;
     virtual void Reset() = 0;
 };
 
@@ -32,6 +42,12 @@ class CConfigVariable : public IConfigVariableBase {
     std::optional<std::string> m_Description;
     std::function<std::expected<T, std::string>(std::string)> m_Validator;
 
+    std::map<std::type_index, std::string_view> m_TypeNames = {
+        {typeid(std::string), "string"},
+        {typeid(int), "integer"},
+        {typeid(float), "float"},
+    };
+
 public:
     CConfigVariable(std::string Name,
                     T DefaultValue,
@@ -42,6 +58,11 @@ public:
     }
 
     std::type_index Type() const override { return typeid(T); }
+    std::string_view TypeString() const override {
+        if (m_TypeNames.contains(Type()))
+            return m_TypeNames.at(Type());
+        return Type().name();
+    }
 
     std::string ValueAsString() const override {
         if constexpr (std::is_same_v<T, std::string>) {
@@ -63,6 +84,14 @@ public:
         }
     }
 
+    json ValueAsJson() const override {
+        return json(Value());
+    }
+
+    json DefaultValueAsJson() const override {
+        return json(DefaultValue());
+    }
+
     std::string_view Name() const override { return m_Name; }
     T Value() const { return m_Value; }
     T DefaultValue() const { return m_DefaultValue; }
@@ -76,6 +105,16 @@ public:
             return {};
         }
         return std::unexpected(result.error());
+    }
+
+    std::expected<void, std::string> TrySetJson(const json& Value) override {
+        try {
+            T typedValue = Value.get<T>();
+            m_Value = typedValue;
+            return {};
+        } catch (const json::exception& e) {
+            return std::unexpected("JSON parse error: " + std::string(e.what()));
+        }
     }
 
     void Reset() override { m_Value = m_DefaultValue; }
