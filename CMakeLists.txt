@@ -4,11 +4,31 @@ project(config)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-file(GLOB_RECURSE SOURCES "src/lib/*.h" "src/lib/*.cpp" "src/lib/*.hpp")
+add_library(config INTERFACE)
+add_library(config::config ALIAS config)
+target_include_directories(config
+        INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include>
+        $<INSTALL_INTERFACE:include>)
+target_compile_features(config INTERFACE cxx_std_23)
 
-add_library(config-lib INTERFACE ${SOURCES})
-target_include_directories(config-lib INTERFACE src/lib)
+option(CONFIG_BUILD_EXAMPLES "Build config examples" OFF)
 
-add_executable(${PROJECT_NAME} src/main.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE config-lib)
-target_include_directories(${PROJECT_NAME} PRIVATE src)
+if(CONFIG_BUILD_EXAMPLES)
+    add_executable(config-example
+            src/main.cpp
+    )
+    target_link_libraries(config-example PRIVATE config::config)
+    target_include_directories(config-example PRIVATE src)
+endif()
+
+### install
+install(TARGETS config
+        EXPORT configTargets)
+
+install(DIRECTORY src/include/
+        DESTINATION include)
+
+install(EXPORT configTargets
+        NAMESPACE config::
+        DESTINATION lib/cmake/config)
