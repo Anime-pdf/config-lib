@@ -35,9 +35,9 @@ public:
 
     virtual std::optional<std::string_view> Description() const = 0;
 
-    virtual std::expected<void, std::string> TrySet(const std::string &value) = 0;
+    virtual std::expected<void, std::string> TrySet(const std::string &value, bool Init = false) = 0;
 
-    virtual std::expected<void, std::string> TrySetJson(const json &value) = 0;
+    virtual std::expected<void, std::string> TrySetJson(const json &value, bool Init = false) = 0;
 
     virtual void Reset() = 0;
 };
@@ -111,8 +111,8 @@ public:
 
     void Set(T Value) { m_Value = Value; }
 
-    std::expected<void, std::string> TrySet(const std::string &Value) override {
-        if (m_ReadOnly) {
+    std::expected<void, std::string> TrySet(const std::string &Value, bool Init = false) override {
+        if (!Init && m_ReadOnly) {
             return std::unexpected("Variable is read-only");
         }
 
@@ -123,8 +123,8 @@ public:
         return std::unexpected(result.error());
     }
 
-    std::expected<void, std::string> TrySetJson(const json &Value) override {
-        if (m_ReadOnly) {
+    std::expected<void, std::string> TrySetJson(const json &Value, bool Init = false) override {
+        if (!Init && m_ReadOnly) {
             return std::unexpected("Variable is read-only");
         }
 

@@ -258,7 +258,7 @@ public:
                 if (!value.has_value())
                     continue;
 
-                auto result = var->TrySetJson(*value);
+                auto result = var->TrySetJson(*value, true);
                 if (!result.has_value()) {
                     errors.push_back(name + ": " + result.error());
                 }
