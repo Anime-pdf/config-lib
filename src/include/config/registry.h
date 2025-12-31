@@ -326,5 +326,7 @@ inline CConfigRegistry &Config() { return CConfigRegistry::Instance(); }
 #define CONFIG_INT_READONLY(name, defaultValue, validators) CConfigRegistry::Instance().Register<int>(CConfigVariable<int>(name, defaultValue, validators, std::nullopt, true))
 #define CONFIG_FLOAT(name, defaultValue, validators) CConfigRegistry::Instance().Register<float>(CConfigVariable<float>(name, defaultValue, validators))
 #define CONFIG_FLOAT_READONLY(name, defaultValue, validators) CConfigRegistry::Instance().Register<float>(CConfigVariable<float>(name, defaultValue, validators, std::nullopt, true))
+#define CONFIG_BOOLEAN(name, defaultValue, validators) CConfigRegistry::Instance().Register<bool>(CConfigVariable<bool>(name, defaultValue, validators))
+#define CONFIG_BOOLEAN_READONLY(name, defaultValue, validators) CConfigRegistry::Instance().Register<bool>(CConfigVariable<bool>(name, defaultValue, validators, std::nullopt, true))
 
 #endif // CONFIG_REGISTRY_H
