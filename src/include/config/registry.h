@@ -238,6 +238,10 @@ public:
     std::expected<void, std::string> LoadFromFile(const std::string &filepath) {
         std::lock_guard lock(m_Mutex);
 
+        if (!std::filesystem::exists(filepath)) {
+            return std::unexpected("File doesn't exist");
+        }
+
         try {
             std::ifstream file(filepath);
             if (!file.is_open())
