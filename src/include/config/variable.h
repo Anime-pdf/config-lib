@@ -119,6 +119,7 @@ public:
 
         auto result = m_Validator(Value);
         if (result.has_value()) {
+            m_Value = result.value();
             return {};
         }
         return std::unexpected(result.error());
