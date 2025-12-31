@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "include/variable.h"
-#include "include/registry.h"
-#include "include/validator/builder.h"
+#include <config/variable.h>
+#include <config/registry.h>
+#include <config/validator/builder.h>
 
 int main() {
     CONFIG_STRING("veryImportantString", "fas", Validators::StringNonEmpty());
