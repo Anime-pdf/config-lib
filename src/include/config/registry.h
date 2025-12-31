@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <fstream>
 
-#include <external/json.hpp>
+#include <config/external/json.hpp>
 
 #include "variable.h"
 

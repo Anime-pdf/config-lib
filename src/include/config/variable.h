@@ -8,7 +8,7 @@
 #include <typeindex>
 #include <utility>
 
-#include <external/json.hpp>
+#include <config/external/json.hpp>
 
 using namespace nlohmann;
 
