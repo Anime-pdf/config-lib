@@ -55,6 +55,7 @@ class CConfigVariable : public IConfigVariableBase {
         {typeid(std::string), "string"},
         {typeid(int), "integer"},
         {typeid(float), "float"},
+        {typeid(bool), "boolean"},
     };
 
 public:

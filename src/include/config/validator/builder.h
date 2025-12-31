@@ -83,6 +83,27 @@ public:
         return *this;
     }
 
+
+    ValidatorBuilder &Boolean() {
+        m_Pipeline.SetParser([](const std::string &value) -> std::expected<T, std::string> {
+            if (value.empty())
+                return std::unexpected("String should not be empty");
+
+            try {
+                if (value == "1" || value == "true") {
+                    return true;
+                }
+                if (value == "0" || value == "false") {
+                    return false;
+                }
+            } catch (...) {
+                return std::unexpected("Failed to parse bool");
+            }
+            return std::unexpected("Unsupported bool value (1/true/0/false)");
+        });
+        return *this;
+    }
+
     // Typed Validator
 
     ValidatorBuilder &Min(T minValue) {
@@ -143,6 +164,10 @@ namespace Validators {
 
     inline ValidatorBuilder<std::string> StringNonEmpty() {
         return ValidatorBuilder<std::string>().Trim().NotEmpty();
+    }
+
+    inline ValidatorBuilder<bool> Boolean() {
+        return ValidatorBuilder<bool>().Trim().NotEmpty().Boolean();
     }
 }
 
