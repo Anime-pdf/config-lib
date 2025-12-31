@@ -178,6 +178,7 @@ public:
     }
 
     struct VariableInfo {
+        bool readonly = false;
         std::string name;
         std::string type;
         std::string value;
@@ -192,6 +193,7 @@ public:
             return std::nullopt;
 
         VariableInfo info;
+        info.readonly = it->second->ReadOnly();
         info.name = std::string(it->second->Name());
         info.type = it->second->TypeString();
         info.value = it->second->ValueAsString();
@@ -288,6 +290,7 @@ public:
 
             for (const auto &[name, var]: m_Variables) {
                 json varInfo = json::object();
+                varInfo["readonly"] = var->ReadOnly();
                 varInfo["value"] = var->ValueAsJson();
                 varInfo["default"] = var->DefaultValueAsJson();
                 varInfo["type"] = var->TypeString();
