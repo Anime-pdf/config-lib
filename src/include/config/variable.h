@@ -17,6 +17,8 @@ class IConfigVariableBase {
 public:
     virtual ~IConfigVariableBase() = default;
 
+    virtual bool ReadOnly() const = 0;
+
     virtual std::type_index Type() const = 0;
 
     virtual std::string_view TypeString() const = 0;
@@ -42,6 +44,7 @@ public:
 
 template<typename T>
 class CConfigVariable : public IConfigVariableBase {
+    bool m_ReadOnly;
     std::string m_Name;
     T m_Value;
     T m_DefaultValue;
@@ -58,10 +61,12 @@ public:
     CConfigVariable(std::string Name,
                     T DefaultValue,
                     std::function<std::expected<T, std::string>(std::string)> Validator,
-                    const std::optional<std::string> &Description = std::nullopt)
-        : m_Name(std::move(Name)), m_Value(DefaultValue), m_DefaultValue(DefaultValue), m_Description(Description),
+                    const std::optional<std::string> &Description = std::nullopt, bool ReadOnly = false)
+        : m_ReadOnly(ReadOnly), m_Name(std::move(Name)), m_Value(DefaultValue), m_DefaultValue(DefaultValue), m_Description(Description),
           m_Validator(std::move(Validator)) {
     }
+
+    bool ReadOnly() const override { return m_ReadOnly; }
 
     std::type_index Type() const override { return typeid(T); }
 
@@ -107,6 +112,10 @@ public:
     void Set(T Value) { m_Value = Value; }
 
     std::expected<void, std::string> TrySet(const std::string &Value) override {
+        if (m_ReadOnly) {
+            return std::unexpected("Variable is read-only");
+        }
+
         auto result = m_Validator(Value);
         if (result.has_value()) {
             return {};
@@ -115,6 +124,10 @@ public:
     }
 
     std::expected<void, std::string> TrySetJson(const json &Value) override {
+        if (m_ReadOnly) {
+            return std::unexpected("Variable is read-only");
+        }
+
         try {
             T typedValue = Value.get<T>();
             m_Value = typedValue;
